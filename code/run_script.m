@@ -9,14 +9,12 @@ clc;
 
 %% Parameters
 % Flags
-check   = false;                 % Whether to do sanity check
 verbose = true;                  % Whether to show the details
-kinect  = true;                  % Whether to integrate Kinect data
-test    = true;                  % Whether to test
+train   = true;                  % Whether to train
+test    = false;                 % Whether to test
 
 %% Paths
 scriptDir  = fileparts(mfilename('fullpath'));
-dataDir    = '/home/qiong/ese650_data/project4';
 outputDir  = fullfile(scriptDir, '../results');
 if ~exist(outputDir, 'dir')
     mkdir(outputDir); 
@@ -24,23 +22,11 @@ end
 addpath(genpath(scriptDir));
 
 %% Load data
-if test
-    dataIdx = input('Please choose one test dataset (1~3): ');
-    load( fullfile(dataDir, ['Encoders_test', num2str(dataIdx)]) );
-    load( fullfile(dataDir, ['Hokuyo_test', num2str(dataIdx)]), 'Hokuyo0' );
-    Hokuyo   = Hokuyo0; clear Hokuyo0;
-    Imu      = load(fullfile(dataDir, ['imuRaw_test', num2str(dataIdx)]));
-    kinect   = false;
-else
-    dataIdx  = input('Please choose one dataset (20~24): ');
-    load( fullfile(dataDir, ['Encoders', num2str(dataIdx)]) );
-    load( fullfile(dataDir, ['Hokuyo', num2str(dataIdx)]), 'Hokuyo0' );
-    Hokuyo   = Hokuyo0; clear Hokuyo0;
-    Imu      = load(fullfile(dataDir, ['imuRaw', num2str(dataIdx)]));
-end
-
-% unpackKinectDepth;
-
+map = imread('aerial_color.jpg');
+C   = makecform('srgb2lab');
+lab = applycform(map, C);
+vec = reshape(lab, [], 3);
+        
 %% Parse data
 [dc, alpha, tsEn]  = parse_encoders(Encoders);
 [tilt, rpy, tsImu] = parse_imu(Imu, verbose);

@@ -1,0 +1,31 @@
+% Run Script for SLAM for ESE 650 Learning in Robotics
+% Written by Qiong Wang at University of Pennsylvania
+% 03/17/2014
+
+%% Clear up
+clear all;
+close all;
+clc;
+
+%% Parameters
+% Flags
+verbose = true;                  % Whether to show the details
+train   = true;                  % Whether to train
+test    = false;                 % Whether to test
+
+%% Paths
+scriptDir  = fileparts(mfilename('fullpath'));
+outputDir  = fullfile(scriptDir, '../results');
+if ~exist(outputDir, 'dir')
+    mkdir(outputDir); 
+end
+addpath(genpath(scriptDir));
+
+%% Map data into Lab space
+map = imread('aerial_color.jpg');
+C   = makecform('srgb2lab');
+lab = applycform(map, C);
+vec = reshape(lab, [], 3);
+        
+%% Train
+

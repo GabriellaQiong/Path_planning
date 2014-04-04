@@ -62,12 +62,11 @@ if train
         if ~exist('h', 'var')
             h = figure; imshow(map);
         end
+        hold on;
         [x, y] = getpts(h);
         sts(i, :) = [x(1), y(1)];
         eds(i, :) = [x(2), y(2)];
     end
 
-    for i = 1 : pathNum
-        
-    end
+    fo
 end

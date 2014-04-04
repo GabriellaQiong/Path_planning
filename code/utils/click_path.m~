@@ -3,13 +3,12 @@ function path = click_path(st, ed, type, h, verbose)
 % Written by Qiong Wang at University of Pennsylvania
 % 04/04/2014
 
-if nargin < 5
+if nargin < 6
     verbose = false;
 end
-assert(ishandle(h), 'The input should include a figure handle');
+assert(ishandle(h), 'The input');
 
 % Select way points
-h; hold on;
 if ~isempty(st) && ~isempty(ed)
     plot(st(1), st(2), 'r+', 'MarkerSize', 10); plot(st(1), st(2), 'bx', 'MarkerSize', 10);
     ts = text(st(1) + 40, st(2), 'Start', 'FontSize', 14, 'FontWeight', 'bold', 'BackgroundColor',[.7 .7 .9]);

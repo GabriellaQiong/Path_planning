@@ -13,7 +13,7 @@ for i = 1 : wNum - 1
     st   = pts(i, :);
     ed   = pts(i + 1, :);
     grad = (ed(2) - st(2)) / (ed(1) - st(1));
-    pNum = max(ed(2) - st(2), ed(1) - st(1)) - 1;  % Pixel number per line
+    pNum = max(abs(ed(2) - st(2)), abs(ed(1) - st(1))) - 1;  % Pixel number per line
     init = tNum + 1;
     tNum = tNum + pNum;
     

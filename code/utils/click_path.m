@@ -9,7 +9,6 @@ end
 assert(ishandle(h), 'The input should include a figure handle');
 
 % Select way points
-h; hold on;
 if ~isempty(st) && ~isempty(ed)
     plot(st(1), st(2), 'r+', 'MarkerSize', 10); plot(st(1), st(2), 'bx', 'MarkerSize', 10);
     ts = text(st(1) + 40, st(2), 'Start', 'FontSize', 14, 'FontWeight', 'bold', 'BackgroundColor',[.7 .7 .9]);

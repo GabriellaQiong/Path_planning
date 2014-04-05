@@ -30,4 +30,6 @@ for i = 1 : wNum - 1
         y(init : tNum) = round(grad * (x(init : tNum) - st(1)) + st(2));
     end
 end
+x = x';
+y = y';
 end

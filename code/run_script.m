@@ -17,6 +17,7 @@ test    = false;                 % Whether to test
 featNum = 5;                     % Number of features
 H       = cell(featNum, 1);
 pathNum = 5;
+T       = 5;
 
 %% Paths
 scriptDir  = fileparts(mfilename('fullpath'));
@@ -52,7 +53,7 @@ C    = makecform('srgb2lab');
 lab  = applycform(map, C);
 as   = lab(:, :, 2);
 bs   = lab(:, :, 3);
-AB   = reshape(lab(:, :, 2:3), [], 2);
+cVec = reshape(lab, [], 3);
         
 %% Train
 if train
@@ -84,6 +85,29 @@ if train
     end
     
     %%
+    % Choose the region
+    disp('Please choose the sidewalk');
+    GY = [];
+    for i = 1 : T
+        mask = roipoly(map);
+        GY = [GY; cVec(reshape(mask, [], 1), :)];
+    end
+    
+    disp('Please choose the road');
+    AS = [];
+    for i = 1 : T
+        mask = roipoly(map);
+        AS = [AS; cVec(reshape(mask, [], 1), :)];
+    end
+    
+    disp('Please choose the green area');
+    GN = [];
+    for i = 1 : T
+        mask = roipoly(map);
+        GN = [GN; cVec(reshape(mask, [], 1), :)];
+    end
+    
+    %%
     % Find the features for these path
     pdCa = as(sub2ind(size(as), pd(:, 2), pd(:, 1)));
     pdCb = bs(sub2ind(size(bs), pd(:, 2), pd(:, 1)));
@@ -98,6 +122,6 @@ if train
     figure(3); imagesc(tmp);
     %%
     gmmObj = gmdistribution.fit(double([pdCa, pdCb]), 1, 'replicate', 3, 'SharedCov', false);
-    temp   = prob(double(AB), gmmObj.mu, diag(gmmObj.Sigma)');
+    temp   = prob(double(cVec), gmmObj.mu, diag(gmmObj.Sigma)');
     figure(4); imagesc(cat(3, lab(:, : ,1), reshape(temp, [size(as) 2])));
 end

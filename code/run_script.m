@@ -18,6 +18,7 @@ featNum = 5;                     % Number of features
 H       = cell(featNum, 1);
 pathNum = 5;
 T       = 5;
+thresh  = 20;
 
 %% Paths
 scriptDir  = fileparts(mfilename('fullpath'));
@@ -46,14 +47,13 @@ if verbose
     h1 = figure(1); imshow(map);
 end
 bw   = rgb2gray(map);
-H{5} = edge(bw, 'sobel');
 
 % Map data into Lab space
 C    = makecform('srgb2lab');
 lab  = applycform(map, C);
 as   = lab(:, :, 2);
 bs   = lab(:, :, 3);
-cVec = reshape(lab, [], 3);
+cVec = double(reshape(lab, [], 3));
         
 %% Train
 if train
@@ -68,7 +68,7 @@ if train
         sts(i, :) = round([x(1), y(1)]);
         eds(i, :) = round([x(2), y(2)]);
     end
-    %%  
+    
     % Click the path
     h2 = figure(2);
     pd = []; vh = [];
@@ -106,22 +106,24 @@ if train
         mask = roipoly(map);
         GN = [GN; cVec(reshape(mask, [], 1), :)];
     end
+    close(gcf);
     
     %%
-    % Find the features for these path
-    pdCa = as(sub2ind(size(as), pd(:, 2), pd(:, 1)));
-    pdCb = bs(sub2ind(size(bs), pd(:, 2), pd(:, 1)));
-    [~, walk]  = kmeans(double([pdCa, pdCb]), 1);
-    vhCa = as(sub2ind(size(as), vh(:, 2), vh(:, 1)));
-    vhCb = bs(sub2ind(size(bs), vh(:, 2), vh(:, 1)));
-    [~, road]  = kmeans(double([vhCa, vhCb]), 1);
-    %%
-    tmp = (double(as) - road(1)).^2 + (double(bs) - road(2)).^2;
-    tmp = tmp - min(tmp(:));
-    tmp = tmp./max(tmp(:));
-    figure(3); imagesc(tmp);
-    %%
-    gmmObj = gmdistribution.fit(double([pdCa, pdCb]), 1, 'replicate', 3, 'SharedCov', false);
-    temp   = prob(double(cVec), gmmObj.mu, diag(gmmObj.Sigma)');
-    figure(4); imagesc(cat(3, lab(:, : ,1), reshape(temp, [size(as) 2])));
+    % Add region feature
+    grey    = mean(GY, 1);
+    asphlat = mean(AS, 1);
+    green   = mean(GN, 1);
+    
+    walk = reshape(sum(bsxfun(@minus, cVec, grey).^2, 2) <= thresh, size(bw));
+    road = reshape(sum(bsxfun(@minus, cVec, asphalt).^2, 2) <= thresh, size(bw));
+    lawn = reshape(sum(bsxfun(@minus, cVec, green).^2, 2) <= thresh, size(bw));
+    
+    H(:, :, 1) = walk;
+    H(:, :, 2) = road;
+    H(:, :, 3) = lawn;
+    H(:, :, 4) = ~(walk | road | lawn); 
+    H(:, :, 5) = edge(bw, 'sobel');
+    
+    % Train cost map
+    cost = generate_cost(map, H);
 end

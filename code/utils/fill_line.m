@@ -1,5 +1,5 @@
 function [x, y] = fill_line(pts)
-% FILL_LINE() take the waypoints to make line
+% FILL_LINE() takes the waypoints to make line
 % Written by Qiong Wang at University of Pennsylvania
 % 04/04/2014
 

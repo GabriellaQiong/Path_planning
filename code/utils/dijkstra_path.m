@@ -45,3 +45,4 @@ end
 function [amin,i,j] = min2(a)
 [amin, imin] = min(a(:));
 [i,j] = ind2sub(size(a), imin);
+end

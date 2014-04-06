@@ -12,10 +12,10 @@ function  cost = generate_cost(pDes, st, ed, F, verbose)
 if nargin < 3
     verbose = false;
 end
-fNum   = size(F, 3);
-w      = zeros(1, 1, fNum);
-alpha  = ;
-lambda = ;
+
+fNum = size(F, 3);
+w    = zeros(1, 1, fNum);
+
 
 cost = 1 ./ (exp(bsxfun(@times, F, w)) + 1);
 ctg  = dijkstra_matrix(costs, ed(1), ed(2));

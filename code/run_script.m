@@ -15,7 +15,7 @@ test    = false;                 % Whether to test
 
 % Params
 featNum = 5;                     % Number of features
-H       = cell(featNum, 1);
+F       = cell(featNum, 1);
 pathNum = 5;
 T       = 5;
 thresh  = 20;
@@ -68,22 +68,7 @@ if train
         sts(i, :) = round([x(1), y(1)]);
         eds(i, :) = round([x(2), y(2)]);
     end
-    
-    % Click the path
-    h2 = figure(2);
-    pd = []; vh = [];
-    for i = 1 : pathNum
-        clf; imshow(map); hold on;
-        t = title('Please click the path for {\bfpedestrian} :)');
-        p1 = click_path(sts(i, :), eds(i, :), 'p', h2, verbose);
-        set(t, 'String', ('Please click the path for {\bfvehicle} :)'));
-        p2 = click_path(sts(i, :), eds(i, :), 'v', h2, verbose);
-        set(t, 'String', ('Please press {\itEnter} for the next path set :)'));
-        pause;
-        pd = [pd; p1];
-        vh = [vh; p2];
-    end
-    
+       
     %%
     % Choose the region
     disp('Please choose the sidewalk');
@@ -118,12 +103,25 @@ if train
     road = reshape(sum(bsxfun(@minus, cVec, asphalt).^2, 2) <= thresh, size(bw));
     lawn = reshape(sum(bsxfun(@minus, cVec, green).^2, 2) <= thresh, size(bw));
     
-    H(:, :, 1) = walk;
-    H(:, :, 2) = road;
-    H(:, :, 3) = lawn;
-    H(:, :, 4) = ~(walk | road | lawn); 
-    H(:, :, 5) = edge(bw, 'sobel');
+    F(:, :, 1) = walk;
+    F(:, :, 2) = road;
+    F(:, :, 3) = lawn;
+    F(:, :, 4) = ~(walk | road | lawn); 
+    F(:, :, 5) = edge(bw, 'sobel');
     
-    % Train cost map
-    cost = generate_cost(map, H);
+    % Click the path and train cost map
+    h2 = figure(2);
+    pd = []; vh = [];
+    for i = 1 : pathNum
+        clf; imshow(map); hold on;
+        t = title('Please click the path for {\bfpedestrian} :)');
+        p1 = click_path(sts(i, :), eds(i, :), 'p', h2, verbose);
+        set(t, 'String', ('Please click the path for {\bfvehicle} :)'));
+        p2 = click_path(sts(i, :), eds(i, :), 'v', h2, verbose);
+        set(t, 'String', ('Please press {\itEnter} for the next path set :)'));
+        pause;
+        cp = generate_cost(p1, sts(i, :), eds(i, :), F, verbose);
+%         pd = [pd; p1];
+%         vh = [vh; p2];
+    end
 end

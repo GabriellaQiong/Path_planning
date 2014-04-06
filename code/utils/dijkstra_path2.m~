@@ -1,4 +1,6 @@
-function [varargout] = dijkstra_path2(A, C, istart, jstart)
+function [varargout] = dijkstra_path2(A, C, istart, jstart);
+
+[m,n] = size(A);
 
 ipath = istart;
 jpath = jstart;
@@ -31,9 +33,10 @@ end
 
 if nargout == 1 || nargout == 0
     varargout{1} = [ipath, jpath];
-elseif nargout == 2
+elseif nargout == 3
     varargout{1} = ipath;
     varargout{2} = jpath;
+    varargout{3} = yaw;
 end
 end
 

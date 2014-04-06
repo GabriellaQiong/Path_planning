@@ -3,7 +3,7 @@ costs = gen_costs(100, 100, .05);
 goal = [60 60];
 tic;
 ctg = dijkstra_matrix(costs,goal(1),goal(2));
-toc
+toc;
 
 [ip1, jp1] = dijkstra_path(ctg, costs, 1, 1);
 [ip2, jp2] = dijkstra_path2(ctg, costs, 1, 1);

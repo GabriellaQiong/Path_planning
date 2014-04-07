@@ -1,4 +1,4 @@
-function [ipath, jpath] = dijkstra_path(A, C, istart, jstart);
+function [ipath, jpath] = dijkstra_path(A, C, istart, jstart)
 
 [m,n] = size(A);
 
@@ -40,7 +40,7 @@ while 1,
   jpath = [jpath; j1(kmin)];
 
 end
-
+end
 
 function [amin,i,j] = min2(a)
 [amin, imin] = min(a(:));

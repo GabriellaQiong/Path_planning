@@ -9,13 +9,13 @@ clc;
 
 %% Parameters
 % Flags
-verbose = true;                  % Whether to show the details
+verbose = true;               
+% Whether to show the details
 train   = true;                  % Whether to train
 test    = false;                 % Whether to test
 
 % Params
 featNum = 5;                     % Number of features
-F       = cell(featNum, 1);
 pathNum = 5;
 T       = 5;
 thresh  = 20;
@@ -43,10 +43,11 @@ end
 se   = strel('ball', 5, 5);
 map  = imdilate(map, se);
 map  = imerode(map, se);
-if verbose
-    h1 = figure(1); imshow(map);
-end
+% if verbose
+%     h1 = figure(1); imshow(map);
+% end
 bw   = rgb2gray(map);
+sz   = size(bw);
 
 % Map data into Lab space
 C    = makecform('srgb2lab');
@@ -96,32 +97,36 @@ if train
     %%
     % Add region feature
     grey    = mean(GY, 1);
-    asphlat = mean(AS, 1);
+    asphalt = mean(AS, 1);
     green   = mean(GN, 1);
     
-    walk = reshape(sum(bsxfun(@minus, cVec, grey).^2, 2) <= thresh, size(bw));
-    road = reshape(sum(bsxfun(@minus, cVec, asphalt).^2, 2) <= thresh, size(bw));
-    lawn = reshape(sum(bsxfun(@minus, cVec, green).^2, 2) <= thresh, size(bw));
+    walk = sum(bsxfun(@minus, cVec, grey).^2, 2) <= thresh;
+    road = sum(bsxfun(@minus, cVec, asphalt).^2, 2) <= thresh;
+    lawn = sum(bsxfun(@minus, cVec, green).^2, 2) <= thresh;
     
-    F(:, :, 1) = walk;
-    F(:, :, 2) = road;
-    F(:, :, 3) = lawn;
-    F(:, :, 4) = ~(walk | road | lawn); 
-    F(:, :, 5) = edge(bw, 'sobel');
+    F       = zeros(featNum, numel(bw));
+    F(1, :) = walk;
+    F(2, :) = road;
+    F(3, :) = lawn;
+    F(4, :) = ~(walk | road | lawn); 
+    F(5, :) = reshape(edge(bw, 'sobel'), [], 1);
+    clear walk road lawn grey asphalt green mask GY AS GN;
     
+    %%
     % Click the path and train cost map
     h2 = figure(2);
-    pd = []; vh = [];
+    pd = cell(pathNum, 1); vh = cell(pathNum, 1);
     for i = 1 : pathNum
         clf; imshow(map); hold on;
-        t = title('Please click the path for {\bfpedestrian} :)');
-        p1 = click_path(sts(i, :), eds(i, :), 'p', h2, verbose);
+        t     = title('Please click the path for {\bfpedestrian} :)');
+        pd{i} = click_path(sts(i, :), eds(i, :), 'p', h2, verbose);
         set(t, 'String', ('Please click the path for {\bfvehicle} :)'));
-        p2 = click_path(sts(i, :), eds(i, :), 'v', h2, verbose);
+        vh{i} = click_path(sts(i, :), eds(i, :), 'v', h2, verbose);
         set(t, 'String', ('Please press {\itEnter} for the next path set :)'));
         pause;
-        cp = generate_cost(p1, sts(i, :), eds(i, :), F, verbose);
-%         pd = [pd; p1];
-%         vh = [vh; p2];
     end
+    close(h2);
+    %%
+    cp = generate_cost(pd, sts, eds, F, sz, verbose);
+%     cv = generate_cost(vh, sts, eds, F, sz, verbose);
 end

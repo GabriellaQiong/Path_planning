@@ -1,4 +1,4 @@
-function [ipath, jpath] = dijkstra_path(A, C, istart, jstart)
+function [varargout] = dijkstra_path(A, C, istart, jstart)
 
 [m,n] = size(A);
 
@@ -38,7 +38,13 @@ while 1,
   [dmin, kmin] = min(a1);
   ipath = [ipath; i1(kmin)];
   jpath = [jpath; j1(kmin)];
+end
 
+if nargout == 1 || nargout == 0
+    varargout{1} = [ipath, jpath];
+elseif nargout == 2
+    varargout{1} = ipath;
+    varargout{2} = jpath;
 end
 end
 

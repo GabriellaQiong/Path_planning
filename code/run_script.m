@@ -127,6 +127,6 @@ if train
     end
     close(h2);
     %%
-    cp = generate_cost(pd, sts, eds, F, sz, verbose);
-%     cv = generate_cost(vh, sts, eds, F, sz, verbose);
+    [cp, wp] = generate_cost(pd, sts, eds, F, sz, verbose);
+%     [cv, wv] = generate_cost(vh, sts, eds, F, sz, verbose);
 end

@@ -10,7 +10,7 @@ th = 2*pi*[0:nth-1]./nth;
 xr = r*cos(th);
 yr = r*sin(th);
 
-for i = 1:1000,
+while(1)
   x0 = ipath(end);
   y0 = jpath(end);
   d0 = subs_interp(A, x0, y0);

@@ -11,14 +11,14 @@ clc;
 % Flags
 verbose = true;               
 % Whether to show the details
-train   = true;                  % Whether to train
-test    = false;                 % Whether to test
+train   = false;                  % Whether to train
+test    = true;                 % Whether to test
 
 % Params
 featNum = 5;                     % Number of features
 pathNum = 5;
 T       = 5;
-thresh  = 20;
+thresh  = 50;
 
 %% Paths
 scriptDir  = fileparts(mfilename('fullpath'));
@@ -70,7 +70,7 @@ if train
         eds(i, :) = round([x(2), y(2)]);
     end
        
-    %%
+    e
     % Choose the region
     disp('Please choose the sidewalk');
     GY = [];
@@ -96,14 +96,18 @@ if train
     
     %%
     % Add region feature
-    grey    = mean(GY, 1);
-    asphalt = mean(AS, 1);
-    green   = mean(GN, 1);
-    
-    walk = sum(bsxfun(@minus, cVec, grey).^2, 2) <= thresh;
-    road = sum(bsxfun(@minus, cVec, asphalt).^2, 2) <= thresh;
-    lawn = sum(bsxfun(@minus, cVec, green).^2, 2) <= thresh;
-    
+    [~, grey]    = kmeans(GY, 3);
+    [~, asphalt] = kmeans(AS, 3);
+    [~, green]   = kmeans(GN, 3);
+    walk = zeros(numel(bw), 1);
+    road = zeros(numel(bw), 1);
+    lawn = zeros(numel(bw), 1);
+    for i = 1 : 3
+        walk = walk | sum(bsxfun(@minus, cVec, grey(i, :)).^2, 2) <= thresh;
+        road = road | sum(bsxfun(@minus, cVec, asphalt(i, :)).^2, 2) <= thresh;
+        lawn = lawn | sum(bsxfun(@minus, cVec, green(i, :)).^2, 2) <= thresh;
+    end
+    %%
     F       = zeros(featNum, numel(bw));
     F(1, :) = walk;
     F(2, :) = road;
@@ -128,5 +132,20 @@ if train
     close(h2);
     %%
     [cp, wp] = generate_cost(pd, sts, eds, F, sz, verbose);
-%     [cv, wv] = generate_cost(vh, sts, eds, F, sz, verbose);
+    [cv, wv] = generate_cost(vh, sts, eds, F, sz, verbose);
+else
+   load(fullfile(outputDir, 'cost.mat')) 
+end
+%%
+if test
+    figure; imshow(orig); hold on;
+    [x, y] = getpts(gcf);
+    st     = round([x(1), y(1)]);
+    ed     = round([x(2), y(2)]);
+    ctgp   = dijkstra_matrix(cp, ed(2), ed(1));
+    ctgv   = dijkstra_matrix(cv, ed(2), ed(1));
+    pp     = dijkstra_path(ctgp, cp, st(2), st(1));
+    pv     = dijkstra_path(ctgv, cv, st(2), st(1));
+    plot(pp(:, 2), pp(:, 1), 'ro');
+    plot(pv(:, 2), pv(:, 1), 'bo');
 end

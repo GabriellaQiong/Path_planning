@@ -17,7 +17,7 @@ fNum   = size(F, 1);            % Feature Number
 N      = size(sts, 1);          % Paths Number
 alpha  = 1;                     % Learning Rate
 lambda = 0.01;                  % Regularization factor
-T      = 10;                    % Maximum Iteration
+T      = 20;                    % Maximum Iteration
 
 % Precompute pDes visitation vector and beta
 pIdxDes = zeros(size(F, 2), N);
@@ -32,9 +32,8 @@ end
 t = 1;
 w = zeros(fNum, 1);
 while t < T
-    t
     g = 0;
-    cost    = reshape(1 ./ (exp(w'* F) + 1), sz(1), sz(2));
+    cost    = reshape(exp(w'* F), sz(1), sz(2));
     for i = 1 : N
         % Compute cost and min path
         ctg     = dijkstra_matrix(cost, eds(i, 2), eds(i, 1));
@@ -47,7 +46,7 @@ while t < T
 %         l    = double(pIdxMin & pIdxDes(:, i)) - double(xor(pIdxMin, pIdxDes(:, i)));
 %         tmp  = 2 * beta(i) * ((w' * F + l') * pIdxDes(:, i) - w' * F * pIdxMin) ...
 %                .* F * (pIdxDes(:, i) - pIdxMin);
-        tmp  = beta(i) * F * (pIdxDes(:, i) - pIdxMin);
+        tmp  = beta(i) * F * (- pIdxMin + pIdxDes(:, i));
         g    = g + tmp;
     end
     g     = g / N + lambda .* w;
@@ -60,12 +59,12 @@ if ~verbose
     return;
 end
 
-cost    = reshape(1 ./ (exp(w'* F) + 1), sz(1), sz(2));
-figure(4); imagesc(cost); title('Cost Map');
-hold on; c = 'rgbcy';
+cost    = reshape(exp(w'* F), sz(1), sz(2));
+figure(4); imagesc(cost); title('Cost Map');axis image;
+hold on; c = 'rgbcm';
 for i = 1 : N
     ctg     = dijkstra_matrix(cost, eds(i, 2), eds(i, 1));
-    pMin    = dijkstra_path2(ctg, cost, sts(i, 2), sts(i, 1));
+    pMin    = dijkstra_path(ctg, cost, sts(i, 2), sts(i, 1));
     plot(pMin(:, 2), pMin(:, 1), [c(i), 'o']);
 end
 end

@@ -16,8 +16,7 @@ end
 fNum   = size(F, 1);            % Feature Number
 N      = size(sts, 1);          % Paths Number
 alpha  = 1;                     % Learning Rate
-lambda = 1;
-T      = 10;                   % Maximum Iteration
+T      = 10;                    % Maximum Iteration
 
 % Precompute pDes visitation vector and beta
 pIdxDes = zeros(size(F, 2), N);
@@ -29,30 +28,22 @@ for i = 1 : N
 end
 
 % Maximum Margin Planning
-t    = 1;
+t    = 0;
 w    = zeros(fNum, 1);
-cost = reshape(exp(w'* F), sz(1), sz(2));
-while t < 2
+while t < T
     t
-    g = 0;
     for i = 1 : N
         % Compute cost and min path
+        l       = ~ pIdxDes(:, i);
+        cost    = reshape(exp(w'* F) - l', sz(1), sz(2));
         ctg     = dijkstra_matrix(cost, eds(i, 2), eds(i, 1));
         pMin    = dijkstra_path2(ctg, cost, sts(i, 2), sts(i, 1));
         indices = round(sub2ind(sz, pMin(:, 1), pMin(:, 2)));
         pIdxMin = zeros(size(F, 2), 1);
         pIdxMin(indices) = 1;
-        
-	    % Compute the descent gradient
-        l    = double(pIdxMin & pIdxDes(:, i)) - double(xor(pIdxMin, pIdxDes(:, i)));
-        tmp  = 2 * beta(i) * ((w' * F + l') * pIdxDes(:, i) - w' * F * pIdxMin) ...
-               .* F * (pIdxDes(:, i) - pIdxMin);
-%         tmp  = F * (pIdxDes(:, i) - pIdxMin);
-        g    = g + tmp;
+        h       = F * pIdxMin - F * pIdxDes(:, i);
     end
-    g     = g / N + lambda .* w;
-    w     = w - alpha .* g ;
-    cost  = reshape(exp(w' * F + l'), sz(1), sz(2));
+    w     = w + alpha .* h ;
     t     = t + 1;
     alpha = alpha / t; 
 end

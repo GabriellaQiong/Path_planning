@@ -44,8 +44,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     if (iGoal < 0) iGoal = 0;
     if (iGoal >= m-1) iGoal = m-1;
     jGoal = mxGetScalar(prhs[2])-1; // 0-indexed nodes
-    if (jGoal < 0) iGoal = 0;
-    if (jGoal >= n-1) iGoal = n-1;
+    if (jGoal < 0) jGoal = 0;
+    if (jGoal >= n-1) jGoal = n-1;
   }
   int indGoal = iGoal+m*jGoal; // linear index
 

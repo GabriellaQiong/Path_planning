@@ -26,7 +26,7 @@ outputDir  = fullfile(scriptDir, '../results');
 if ~exist(outputDir, 'dir')
     mkdir(outputDir); 
 end
-addpath(genpath(scriptDir));
+addpath(genpath(fullfile(scriptDir, '../code')));
 
 %% Load Data and Preprocess Data
 % Load original map
